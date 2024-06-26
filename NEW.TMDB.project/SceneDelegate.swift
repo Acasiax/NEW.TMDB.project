@@ -2,7 +2,7 @@
 //  SceneDelegate.swift
 //  NEW.TMDB.project
 //
-//  Created by 이윤지 on 6/26/24.
+//  Created by 이윤지 on 6/25/24.
 //
 
 import UIKit

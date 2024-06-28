@@ -32,20 +32,53 @@ struct PopularMovie: Decodable {
         case backdropPath = "backdrop_path"
         case genreIds = "genre_ids"
     }
+    
+    var posterURL: URL? {
+        guard let posterPath = posterPath else { return nil }
+        return URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)")
+    }
+    
+    var backdropURL: URL? {
+        guard let backdropPath = backdropPath else { return nil }
+        return URL(string: "https://image.tmdb.org/t/p/w500\(backdropPath)")
+    }
+    
 }
 
 
 // 1. url  2.query string  3. http헤더 작성하기 4.request 5.response (response string)
 // 
 class HomeViewController: UIViewController {
-
+    
+    private var collectionView: UICollectionView!
     private var models = [PopularMovie]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        setupCollectionView()
         fetchMovies()
     }
+    
+    func setupCollectionView() {
+            let layout = UICollectionViewFlowLayout()
+            layout.itemSize = CGSize(width: view.frame.size.width / 1 - 30, height: view.frame.size.width / 1 )
+            layout.minimumInteritemSpacing = 5
+            layout.minimumLineSpacing = 5
+
+            collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+            collectionView.register(HomeCollectionViewCell.self, forCellWithReuseIdentifier: HomeCollectionViewCell.id)
+            collectionView.delegate = self
+            collectionView.dataSource = self
+            collectionView.backgroundColor = .white
+
+            view.addSubview(collectionView)
+            collectionView.snp.makeConstraints { make in
+                make.edges.equalToSuperview()
+            }
+        }
+
+    
     
     func fetchMovies(){
         let url = APIUrl.popularMovieUrl + "&page=1"
@@ -57,7 +90,8 @@ class HomeViewController: UIViewController {
         AF.request(url, method: .get, headers: header).responseDecodable(of:PopularMovieResponse.self ) { response in
             switch response.result {
             case .success(let value):
-                print(value.results)
+                self.models = value.results
+                self.collectionView.reloadData()
             case .failure(let error):
                 print(error)
             }
@@ -87,7 +121,9 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeCollectionViewCell.identifier, for: indexPath) as! HomeCollectionViewCell
-        
+        let model = models[indexPath.row]
+        cell.configure(with: model)
+        cell.backgroundColor = .yellow
         return cell
     }
     

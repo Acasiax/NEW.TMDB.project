@@ -15,41 +15,45 @@ class TMDBAPI {
     
     private init() {}
     
-    func fetchSimilarMovies(indexMovieID: Int, completionHandler: @escaping ([PopularMovie]) -> Void, errorHandler: @escaping (String) -> Void){
+    typealias typealiasHandler = ([PopularMovie]?, String?) -> Void
+    
+    func fetchSimilarMovies(api: TMDBApiManager  , indexMovieID: Int, completionHandler: @escaping typealiasHandler){
      
-        let similarMovieurl = APIUrl.similarMoviesUrl(for: indexMovieID)
+       // let similarMovieurl = APIUrl.similarMoviesUrl(for: indexMovieID)
         
-        let header: HTTPHeaders = [
-            "api_key": APIKey.TMDBAPIKey, "language": "ko-KR", "page": "1"
-        ]
+      
+        
+       // let header: HTTPHeaders = [
+       //     "api_key": APIKey.TMDBAPIKey, "language": "ko-KR", "page": "1"
+      //  ]
         
         
         
-        AF.request(similarMovieurl, method: .get, headers: header).responseDecodable(of:SimilarMovieResponse.self ) { response in
+        AF.request(api.endpoint, method: api.method, parameters: api.parameter, encoding: URLEncoding(destination: .queryString), headers: api.header).responseDecodable(of:SimilarMovieResponse.self ) { response in
             switch response.result {
             case .success(let value):
-                completionHandler(value.results)
+                completionHandler(value.results, nil)
             case .failure(let error):
-                errorHandler(error.localizedDescription)
+                completionHandler(nil, "잠시후 다시 시도해주세요")
             }
         }
     }
     
     
-   func fetchRecommendations(for indexMovieID: Int, completionHandler: @escaping ([PopularMovie]) -> Void, errorHandler: @escaping (String) -> Void) {
-        let recommendMovieurl = APIUrl.recommendationsUrl(for: indexMovieID)
+    func fetchRecommendations(api: TMDBApiManager, for indexMovieID: Int, completionHandler: @escaping ([PopularMovie]?, String?) -> Void) {
+      //  let recommendMovieurl = APIUrl.recommendationsUrl(for: indexMovieID)
         
-        let header: HTTPHeaders = [
-            "api_key": APIKey.TMDBAPIKey, "language": "ko-KR", "page": "1"
-        ]
+//        let header: HTTPHeaders = [
+//            "api_key": APIKey.TMDBAPIKey, "language": "ko-KR", "page": "1"
+//        ]
         
-        AF.request(recommendMovieurl, method: .get, headers: header).responseDecodable(of: RecommendMovieResponse.self ) { response in
+        AF.request(api.endpoint, method: api.method,parameters: api.parameter, encoding: URLEncoding(destination: .queryString),headers: api.header).responseDecodable(of: RecommendMovieResponse.self ) { response in
             switch response.result {
             case .success(let value):
-                completionHandler(value.results)
+                completionHandler(value.results, nil)
                 
             case .failure(let error):
-                errorHandler(error.localizedDescription)
+                completionHandler(nil, "잠시후 다시 시도해주세요")
             }
          
         }

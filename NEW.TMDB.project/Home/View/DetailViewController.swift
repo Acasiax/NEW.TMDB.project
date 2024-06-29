@@ -28,6 +28,7 @@ class DetailViewController: UIViewController {
     private var popularMovieModel: PopularMovie?  // 선택한 영화 정보를 저장할 프로퍼티
     private var similarMovieModels = [PopularMovie]()
     private var recommendMoviemodels = [PopularMovie]()
+    private var failedMovieIds = Set<Int>() //통신실패한거
     // PopularMovie 모델을 받아 초기화하는 생성자
     convenience init(model: PopularMovie) {
         self.init()
@@ -57,31 +58,42 @@ class DetailViewController: UIViewController {
     }
     
     private func fetchMovieData() {
-         guard let movieId = popularMovieModel?.id else { return }
-         
+        guard let movieId = popularMovieModel?.id else { return }
+       
         let group = DispatchGroup()
+        group.enter()
+        TMDBAPI.shared.fetchSimilarMovies(api: .simiarMovie(movieId: movieId), indexMovieID: movieId) { movies, error in
+            if let error = error {
+                print("비슷한 영화 가져오기 오류: \(error)")
+                self.failedMovieIds.insert(movieId)
+            } else {
+                if let movies = movies {
+                    self.similarMovieModels = movies
+                    self.tableView.reloadData()
+                }
+            }
+            group.leave()
+        }
+
         
+
         group.enter()
-         TMDBAPI.shared.fetchSimilarMovies(indexMovieID: movieId) { movies in
-             self.similarMovieModels = movies
-             self.tableView.reloadData()
-             group.leave()
-         } errorHandler: { error in
-             print("Failed to fetch similar movies: \(error)")
-             group.leave()
-         }
+        TMDBAPI.shared.fetchRecommendations(api: .recommendMovie(movieId: movieId), for: movieId) { movie, error in
+            if let error = error {
+                print("고객님 이런\(error)")
+                self.failedMovieIds.insert(movieId)
+            } else {
+                if let movie = movie {
+                    self.recommendMoviemodels = movie
+                    self.tableView.reloadData()
+                }
+            }
+            group.leave()   //위치를 여기에 해야 여러번 안씀 잘 보셈
+        }
          
-        group.enter()
-         TMDBAPI.shared.fetchRecommendations(for: movieId) { movies in
-             self.recommendMoviemodels = movies
-             self.tableView.reloadData()
-             group.leave()
-         } errorHandler: { error in
-             print("Failed to fetch recommendations: \(error)")
-             group.leave()
-         }
         
         group.notify(queue: .main) {
+            self.recommendMoviemodels.removeAll { self.failedMovieIds.contains($0.id) } //통신 실패한것만 배열에서 제거
             self.tableView.reloadData()
            }
      }

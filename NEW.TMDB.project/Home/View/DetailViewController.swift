@@ -26,7 +26,7 @@ import Kingfisher
 class DetailViewController: UIViewController {
     
     private var popularMovieModel: PopularMovie?  // 선택한 영화 정보를 저장할 프로퍼티
-    private var similarMoviemodels = [PopularMovie]()
+    private var similarMovieModels = [PopularMovie]()
     private var recommendMoviemodels = [PopularMovie]()
     // PopularMovie 모델을 받아 초기화하는 생성자
     convenience init(model: PopularMovie) {
@@ -49,9 +49,7 @@ class DetailViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         if let selectedMovieID = popularMovieModel?.id {
-        
             fetchMovieData(indexMovieID: selectedMovieID)
-            
         }
         configureHierarchy()
         configureLayout()
@@ -64,12 +62,12 @@ class DetailViewController: UIViewController {
         group.enter() //비동기 작업의 시작
         fetchSimilarMovies(indexMovieID: indexMovieID) {
             group.leave()
-        }
+        } errorHandler: <#(String) -> Void#>
         
         group.enter()
         fetchRecommendations(for: indexMovieID) {
             group.leave()
-        }
+        } errorHandler: <#(String) -> Void#>
         
         // 모든 작업이 완료되면 알림
         group.notify(queue: .main) {
@@ -103,7 +101,7 @@ class DetailViewController: UIViewController {
 
 extension DetailViewController {
     
-    func fetchSimilarMovies(indexMovieID: Int, completion: @escaping () -> Void){
+    private func fetchSimilarMovies(indexMovieID: Int, CompletionHandler: @escaping () -> Void, errorHandler: @escaping (String) -> Void){ //클로저가 함수가 반환된 후에도 실행될 수 있음. fetchMovieData에 사용해야 되니까.  () -> Void는 인수가 없고 반환 값도 없는 클로저의 타입, 비동기 네트워크 요청할 때도 사용
         let similarMovieurl = APIUrl.similarMoviesUrl(for: indexMovieID)
         
         let header: HTTPHeaders = [
@@ -113,7 +111,7 @@ extension DetailViewController {
         AF.request(similarMovieurl, method: .get, headers: header).responseDecodable(of:SimilarMovieResponse.self ) { response in
             switch response.result {
             case .success(let value):
-                self.similarMoviemodels = value.results
+                self.similarMovieModels = value.results
                 print("'⚠️'")
                 print("비슷한 영화 정보 가져오기 성공:", value.results)
                 self.tableView.reloadData()
@@ -121,12 +119,12 @@ extension DetailViewController {
             case .failure(let error):
                 print("비슷한 영화 정보 가져오기 실패:", error)
             }
-            completion() // 완료 핸들러를 호출하여 DispatchGroup에서 빠져나옵니다.
+            CompletionHandler() // 완료 핸들러를 호출하여 DispatchGroup에서 빠져나옵니다.
         }
         
     }
     
-    private func fetchRecommendations(for indexMovieID: Int, completion: @escaping () -> Void) {
+    private func fetchRecommendations(for indexMovieID: Int, completionHandler: @escaping () -> Void, errorHandler: @escaping (String) -> Void) {
         let recommendMovieurl = APIUrl.recommendationsUrl(for: indexMovieID)
         
         let header: HTTPHeaders = [
@@ -143,7 +141,7 @@ extension DetailViewController {
             case .failure(let error):
                 print(error)
             }
-            completion()
+            completionHandler()
         }
     }
 }
@@ -152,7 +150,7 @@ extension DetailViewController {
 extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 2 // 두 개의 행을 반환 (추천 영화와 비슷한 영화)
+        return 2
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -194,7 +192,7 @@ extension DetailViewController: UICollectionViewDataSource, UICollectionViewDele
             return recommendMoviemodels.count
         } else if collectionView.tag == 1 {
             // 비슷한 영화 컬렉션 뷰일 때
-            return similarMoviemodels.count
+            return similarMovieModels.count
         }
         return 0
     }
@@ -212,7 +210,7 @@ extension DetailViewController: UICollectionViewDataSource, UICollectionViewDele
         } else if collectionView.tag == 1 {
             // 비슷한 영화 컬렉션 뷰 셀 설정
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SimilarCollectionViewCell.identifier, for: indexPath) as! SimilarCollectionViewCell
-            if let posterPath = similarMoviemodels[indexPath.item].posterPath {
+            if let posterPath = similarMovieModels[indexPath.item].posterPath {
                 let imageUrl = URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)")
                 cell.posterImageView.kf.setImage(with: imageUrl)
             }

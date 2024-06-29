@@ -40,7 +40,7 @@ class DetailViewController: UIViewController {
         view.delegate = self
         view.dataSource = self
         view.rowHeight = 200
-        view.register(HomeSimilarTableViewCell.self, forCellReuseIdentifier: HomeSimilarTableViewCell.identifier)
+        view.register(HomeTableViewCell.self, forCellReuseIdentifier: HomeTableViewCell.identifier)
         return view
     }()
     
@@ -125,50 +125,74 @@ extension DetailViewController {
     }
 }
 
+// 테이블뷰 데이터 소스 및 델리게이트 관련 extension
 extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 2
-    }
     
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 2 // 두 개의 행을 반환 (추천 영화와 비슷한 영화)
+    }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: HomeSimilarTableViewCell.identifier, for: indexPath) as! HomeSimilarTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: HomeTableViewCell.identifier, for: indexPath) as! HomeTableViewCell
         
-        
-        if let popularMovieTitle = popularMovieModel?.title {
-            cell.titleLabel.text = "\(popularMovieTitle)와 비슷한 영화"
+        if indexPath.row == 0 {
+            // 첫 번째 행일 때, 추천 영화 데이터 표시
+            if let popularMovieTitle = popularMovieModel?.title {
+                cell.titleLabel.text = "🍿 \(popularMovieTitle) 추천 영화"
+            }
+            cell.collectionView.tag = 0
+            cell.collectionView.dataSource = self  // 데이터 소스 설정
+            cell.collectionView.delegate = self    // 델리게이트 설정
+            cell.collectionView.register(RecommendCollectionViewCell.self, forCellWithReuseIdentifier: RecommendCollectionViewCell.identifier)
+            cell.collectionView.reloadData()
+        } else if indexPath.row == 1 {
+            // 두 번째 행일 때, 비슷한 영화 데이터 표시
+            if let popularMovieTitle = popularMovieModel?.title {
+                cell.titleLabel.text = "🎥 \(popularMovieTitle)와 비슷한 영화"
+            }
+            cell.collectionView.tag = 1
+            cell.collectionView.dataSource = self  // 데이터 소스 설정
+            cell.collectionView.delegate = self    // 델리게이트 설정
+            cell.collectionView.register(SimilarCollectionViewCell.self, forCellWithReuseIdentifier: SimilarCollectionViewCell.identifier)
+            cell.collectionView.reloadData()
         }
-        cell.similarMoviemodels = similarMoviemodels
-        cell.collectionView.dataSource = self
-        cell.collectionView.delegate = self
-        cell.collectionView.tag = indexPath.row  // 컬렉션 뷰의 태그를 설정하여 나중에 구분할 수 있도록 함
-       // cell.collectionView.tag = 1
-        cell.collectionView.register(RecommendCollectionViewCell.self, forCellWithReuseIdentifier: RecommendCollectionViewCell.identifier)
-        cell.collectionView.reloadData()
-        
-        
-        
-        
-        
         
         return cell
     }
-
-    
-    
 }
 
+// 컬렉션뷰 데이터 소스 및 델리게이트 관련 extension
 extension DetailViewController: UICollectionViewDataSource, UICollectionViewDelegate {
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return similarMoviemodels.count
-    }
-
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RecommendCollectionViewCell.identifier, for: indexPath) as! RecommendCollectionViewCell
-        if let posterPath = similarMoviemodels[indexPath.row].posterPath {
-            let imageUrl = URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)")
-            cell.posterImageView.kf.setImage(with: imageUrl)
+        if collectionView.tag == 0 {
+            // 추천 영화 컬렉션 뷰일 때
+            return recommendMoviemodels.count
+        } else if collectionView.tag == 1 {
+            // 비슷한 영화 컬렉션 뷰일 때
+            return similarMoviemodels.count
         }
-        return cell
+        return 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        if collectionView.tag == 0 {
+            // 추천 영화 컬렉션 뷰 셀 설정
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RecommendCollectionViewCell.identifier, for: indexPath) as! RecommendCollectionViewCell
+            if let posterPath = recommendMoviemodels[indexPath.item].posterPath {
+                let imageUrl = URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)")
+                cell.posterImageView.kf.setImage(with: imageUrl)
+            }
+            return cell
+        } else if collectionView.tag == 1 {
+            // 비슷한 영화 컬렉션 뷰 셀 설정
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SimilarCollectionViewCell.identifier, for: indexPath) as! SimilarCollectionViewCell
+            if let posterPath = similarMoviemodels[indexPath.item].posterPath {
+                let imageUrl = URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)")
+                cell.posterImageView.kf.setImage(with: imageUrl)
+            }
+            return cell
+        }
+        return UICollectionViewCell()
     }
 }

@@ -8,8 +8,8 @@
 import UIKit
 import SnapKit
 
-class HomeSimilarTableViewCell: UITableViewCell {
-    var similarMoviemodels = [PopularMovie]() // 영화 데이터를 저장하는 프로퍼티
+class HomeTableViewCell: UITableViewCell {
+    var HomeMoviemodels = [PopularMovie]() // 영화 데이터를 저장하는 프로퍼티
     
     let titleLabel: UILabel = {
         let label = UILabel()
@@ -55,12 +55,12 @@ class HomeSimilarTableViewCell: UITableViewCell {
         
         collectionView.snp.makeConstraints { make in
             make.horizontalEdges.bottom.equalTo(contentView)
-            make.top.equalTo(titleLabel.snp.bottom)
+            make.top.equalTo(titleLabel.snp.bottom).offset(10)
         }
     }
     //백그라운드
     func configureView(){
-        collectionView.backgroundColor = .blue
-        titleLabel.backgroundColor = .red
+      //  collectionView.backgroundColor = .blue
+        //titleLabel.backgroundColor = .red
     }
 }

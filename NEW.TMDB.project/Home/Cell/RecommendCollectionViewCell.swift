@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SnapKit
 
 class RecommendCollectionViewCell: UICollectionViewCell {
     let posterImageView = UIImageView()
@@ -17,7 +18,7 @@ class RecommendCollectionViewCell: UICollectionViewCell {
             make.edges.equalTo(contentView)
         }
         posterImageView.backgroundColor = .systemMint
-        posterImageView.contentMode = .scaleAspectFill // 이미지의 콘텐츠 모드를 설정
+        posterImageView.contentMode = .scaleAspectFit
         posterImageView.clipsToBounds = true // 이미지가 프레임을 넘어가지 않도록 설정
     }
     
@@ -40,7 +41,7 @@ class SimilarCollectionViewCell: UICollectionViewCell {
             make.edges.equalTo(contentView)
         }
         posterImageView.backgroundColor = .systemMint
-        posterImageView.contentMode = .scaleAspectFill // 이미지의 콘텐츠 모드를 설정
+        posterImageView.contentMode = .scaleAspectFit 
         posterImageView.clipsToBounds = true // 이미지가 프레임을 넘어가지 않도록 설정
     }
     

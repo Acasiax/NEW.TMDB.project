@@ -6,16 +6,16 @@
 //
 
 struct SimilarMovieResponse: Decodable {
-        let page: Int
-        let results: [PopularMovie]
-        let total_pages: Int
+    let page: Int
+    let results: [PopularMovie]
+    let total_pages: Int
     
 }
 
 struct RecommendMovieResponse: Decodable {
-        let page: Int
-        let results: [PopularMovie]
-        let total_pages: Int
+    let page: Int
+    let results: [PopularMovie]
+    let total_pages: Int
     
 }
 
@@ -49,12 +49,33 @@ class DetailViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         if let selectedMovieID = popularMovieModel?.id {
-            fetchSimilarMovies(indexMovieID: selectedMovieID)
-            fetchRecommendations(for: selectedMovieID)
+        
+            fetchMovieData(indexMovieID: selectedMovieID)
+            
         }
         configureHierarchy()
         configureLayout()
         configureView()
+    }
+    
+    func fetchMovieData(indexMovieID: Int){
+        let group = DispatchGroup()
+        
+        group.enter() //비동기 작업의 시작
+        fetchSimilarMovies(indexMovieID: indexMovieID) {
+            group.leave()
+        }
+        
+        group.enter()
+        fetchRecommendations(for: indexMovieID) {
+            group.leave()
+        }
+        
+        // 모든 작업이 완료되면 알림
+        group.notify(queue: .main) {
+            // 모든 API 호출이 완료된 후 테이블 뷰 새로고침.
+            self.tableView.reloadData()
+        }
     }
     
     //서브뷰
@@ -75,36 +96,37 @@ class DetailViewController: UIViewController {
     func configureView(){
         view.backgroundColor = .gray
     }
-
+    
     
 }
 
 
 extension DetailViewController {
     
-    func fetchSimilarMovies(indexMovieID: Int){
+    func fetchSimilarMovies(indexMovieID: Int, completion: @escaping () -> Void){
         let similarMovieurl = APIUrl.similarMoviesUrl(for: indexMovieID)
         
         let header: HTTPHeaders = [
             "api_key": APIKey.TMDBAPIKey, "language": "ko-KR", "page": "1"
         ]
         
-                AF.request(similarMovieurl, method: .get, headers: header).responseDecodable(of:SimilarMovieResponse.self ) { response in
-                    switch response.result {
-                    case .success(let value):
-                        self.similarMoviemodels = value.results
-                        print("'⚠️'")
-                        print(value.results)
-                        self.tableView.reloadData()
-                       // self.collectionView.reloadData()
-                    case .failure(let error):
-                        print(error)
-                    }
-                }
-
+        AF.request(similarMovieurl, method: .get, headers: header).responseDecodable(of:SimilarMovieResponse.self ) { response in
+            switch response.result {
+            case .success(let value):
+                self.similarMoviemodels = value.results
+                print("'⚠️'")
+                print("비슷한 영화 정보 가져오기 성공:", value.results)
+                self.tableView.reloadData()
+                // self.collectionView.reloadData()
+            case .failure(let error):
+                print("비슷한 영화 정보 가져오기 실패:", error)
+            }
+            completion() // 완료 핸들러를 호출하여 DispatchGroup에서 빠져나옵니다.
+        }
+        
     }
     
-    private func fetchRecommendations(for indexMovieID: Int) {
+    private func fetchRecommendations(for indexMovieID: Int, completion: @escaping () -> Void) {
         let recommendMovieurl = APIUrl.recommendationsUrl(for: indexMovieID)
         
         let header: HTTPHeaders = [
@@ -115,12 +137,13 @@ extension DetailViewController {
             switch response.result {
             case .success(let value):
                 self.recommendMoviemodels = value.results
-              //  print(value.results)
+                //  print(value.results)
                 self.tableView.reloadData()
                 
             case .failure(let error):
                 print(error)
             }
+            completion()
         }
     }
 }
@@ -138,7 +161,7 @@ extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
         if indexPath.row == 0 {
             // 첫 번째 행일 때, 추천 영화 데이터 표시
             if let popularMovieTitle = popularMovieModel?.title {
-                cell.titleLabel.text = "🍿 \(popularMovieTitle) 추천 영화"
+                cell.titleLabel.text = "🍿 \(popularMovieTitle)을 좋아한다면 이 영화를 추천"
             }
             cell.collectionView.tag = 0
             cell.collectionView.dataSource = self  // 데이터 소스 설정
@@ -148,7 +171,7 @@ extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
         } else if indexPath.row == 1 {
             // 두 번째 행일 때, 비슷한 영화 데이터 표시
             if let popularMovieTitle = popularMovieModel?.title {
-                cell.titleLabel.text = "🎥 \(popularMovieTitle)와 비슷한 영화"
+                cell.titleLabel.text = "🎥 \(popularMovieTitle)과 비슷한 영화입니다"
             }
             cell.collectionView.tag = 1
             cell.collectionView.dataSource = self  // 데이터 소스 설정
@@ -160,6 +183,7 @@ extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
         return cell
     }
 }
+
 
 // 컬렉션뷰 데이터 소스 및 델리게이트 관련 extension
 extension DetailViewController: UICollectionViewDataSource, UICollectionViewDelegate {
@@ -174,6 +198,7 @@ extension DetailViewController: UICollectionViewDataSource, UICollectionViewDele
         }
         return 0
     }
+    
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if collectionView.tag == 0 {

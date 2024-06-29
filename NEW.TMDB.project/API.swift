@@ -16,12 +16,14 @@ class TMDBAPI {
     private init() {}
     
     func fetchSimilarMovies(indexMovieID: Int, completionHandler: @escaping ([PopularMovie]) -> Void, errorHandler: @escaping (String) -> Void){
-        
+     
         let similarMovieurl = APIUrl.similarMoviesUrl(for: indexMovieID)
         
         let header: HTTPHeaders = [
             "api_key": APIKey.TMDBAPIKey, "language": "ko-KR", "page": "1"
         ]
+        
+        
         
         AF.request(similarMovieurl, method: .get, headers: header).responseDecodable(of:SimilarMovieResponse.self ) { response in
             switch response.result {
@@ -52,10 +54,6 @@ class TMDBAPI {
          
         }
     }
-    
-    
-    
-    
-    
+  
     
 }

@@ -49,32 +49,43 @@ class DetailViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         if let selectedMovieID = popularMovieModel?.id {
-            fetchMovieData(indexMovieID: selectedMovieID)
+            fetchMovieData()
         }
         configureHierarchy()
         configureLayout()
         configureView()
     }
     
-    func fetchMovieData(indexMovieID: Int){
+    private func fetchMovieData() {
+         guard let movieId = popularMovieModel?.id else { return }
+         
         let group = DispatchGroup()
         
-        group.enter() //비동기 작업의 시작
-        fetchSimilarMovies(indexMovieID: indexMovieID) {
-            group.leave()
-        } errorHandler: <#(String) -> Void#>
-        
         group.enter()
-        fetchRecommendations(for: indexMovieID) {
-            group.leave()
-        } errorHandler: <#(String) -> Void#>
+         TMDBAPI.shared.fetchSimilarMovies(indexMovieID: movieId) { movies in
+             self.similarMovieModels = movies
+             self.tableView.reloadData()
+             group.leave()
+         } errorHandler: { error in
+             print("Failed to fetch similar movies: \(error)")
+             group.leave()
+         }
+         
+        group.enter()
+         TMDBAPI.shared.fetchRecommendations(for: movieId) { movies in
+             self.recommendMoviemodels = movies
+             self.tableView.reloadData()
+             group.leave()
+         } errorHandler: { error in
+             print("Failed to fetch recommendations: \(error)")
+             group.leave()
+         }
         
-        // 모든 작업이 완료되면 알림
         group.notify(queue: .main) {
-            // 모든 API 호출이 완료된 후 테이블 뷰 새로고침.
             self.tableView.reloadData()
-        }
-    }
+           }
+     }
+ 
     
     //서브뷰
     func configureHierarchy() {
@@ -95,56 +106,8 @@ class DetailViewController: UIViewController {
         view.backgroundColor = .gray
     }
     
-    
 }
 
-
-extension DetailViewController {
-    
-    private func fetchSimilarMovies(indexMovieID: Int, CompletionHandler: @escaping () -> Void, errorHandler: @escaping (String) -> Void){ //클로저가 함수가 반환된 후에도 실행될 수 있음. fetchMovieData에 사용해야 되니까.  () -> Void는 인수가 없고 반환 값도 없는 클로저의 타입, 비동기 네트워크 요청할 때도 사용
-        let similarMovieurl = APIUrl.similarMoviesUrl(for: indexMovieID)
-        
-        let header: HTTPHeaders = [
-            "api_key": APIKey.TMDBAPIKey, "language": "ko-KR", "page": "1"
-        ]
-        
-        AF.request(similarMovieurl, method: .get, headers: header).responseDecodable(of:SimilarMovieResponse.self ) { response in
-            switch response.result {
-            case .success(let value):
-                self.similarMovieModels = value.results
-                print("'⚠️'")
-                print("비슷한 영화 정보 가져오기 성공:", value.results)
-                self.tableView.reloadData()
-                // self.collectionView.reloadData()
-            case .failure(let error):
-                print("비슷한 영화 정보 가져오기 실패:", error)
-            }
-            CompletionHandler() // 완료 핸들러를 호출하여 DispatchGroup에서 빠져나옵니다.
-        }
-        
-    }
-    
-    private func fetchRecommendations(for indexMovieID: Int, completionHandler: @escaping () -> Void, errorHandler: @escaping (String) -> Void) {
-        let recommendMovieurl = APIUrl.recommendationsUrl(for: indexMovieID)
-        
-        let header: HTTPHeaders = [
-            "api_key": APIKey.TMDBAPIKey, "language": "ko-KR", "page": "1"
-        ]
-        
-        AF.request(recommendMovieurl, method: .get, headers: header).responseDecodable(of: RecommendMovieResponse.self ) { response in
-            switch response.result {
-            case .success(let value):
-                self.recommendMoviemodels = value.results
-                //  print(value.results)
-                self.tableView.reloadData()
-                
-            case .failure(let error):
-                print(error)
-            }
-            completionHandler()
-        }
-    }
-}
 
 // 테이블뷰 데이터 소스 및 델리게이트 관련 extension
 extension DetailViewController: UITableViewDelegate, UITableViewDataSource {

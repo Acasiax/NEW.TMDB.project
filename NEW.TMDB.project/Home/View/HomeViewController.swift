@@ -51,13 +51,13 @@ struct PopularMovie: Decodable {
 class HomeViewController: UIViewController {
     
     private var collectionView: UICollectionView!
-    private var models = [PopularMovie]()
+    private var popularMoviemodels = [PopularMovie]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         setupCollectionView()
-        fetchMovies()
+        fetchPopularMovies()
     }
     
     func setupCollectionView() {
@@ -80,17 +80,17 @@ class HomeViewController: UIViewController {
 
     
     
-    func fetchMovies(){
-        let url = APIUrl.popularMovieUrl + "&page=1"
+    func fetchPopularMovies(){
+        let popularMovieurl = APIUrl.popularMovieUrl + "&page=1"
         
         let header: HTTPHeaders = [
             "api_key": APIKey.TMDBAPIKey, "language": "ko-KR", "page": "1"
         ]
         
-        AF.request(url, method: .get, headers: header).responseDecodable(of:PopularMovieResponse.self ) { response in
+        AF.request(popularMovieurl, method: .get, headers: header).responseDecodable(of:PopularMovieResponse.self ) { response in
             switch response.result {
             case .success(let value):
-                self.models = value.results
+                self.popularMoviemodels = value.results
                 self.collectionView.reloadData()
             case .failure(let error):
                 print(error)
@@ -98,7 +98,7 @@ class HomeViewController: UIViewController {
         }
         
         
-//        AF.request(url, method: .get, headers: header).responseString { response in
+//        AF.request(popularMovieurl, method: .get, headers: header).responseString { response in
 //            switch response.result {
 //            case .success(let value):
 //                print(value)
@@ -107,7 +107,7 @@ class HomeViewController: UIViewController {
 //            }
 //            print(response)
 //        }
-        
+//        
     }
    
 
@@ -116,17 +116,23 @@ class HomeViewController: UIViewController {
 
 extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return models.count
+        return popularMoviemodels.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HomeCollectionViewCell.identifier, for: indexPath) as! HomeCollectionViewCell
-        let model = models[indexPath.row]
+        let model = popularMoviemodels[indexPath.row]
         cell.configure(with: model)
         cell.backgroundColor = .yellow
         return cell
     }
     
-    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let selectedMovie = popularMoviemodels[indexPath.row]
+        let model = popularMoviemodels[indexPath.row]
+        let detailVC = DetailViewController(model: selectedMovie)
+       // let detailVC = DetailViewController()
+        navigationController?.pushViewController(detailVC, animated: true)
+    }
     
 }

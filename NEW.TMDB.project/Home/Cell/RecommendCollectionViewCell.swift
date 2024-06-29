@@ -1,0 +1,50 @@
+//
+//  RecommendCollectionViewCell.swift
+//  NEW.TMDB.project
+//
+//  Created by 이윤지 on 6/28/24.
+//
+
+import UIKit
+
+class RecommendCollectionViewCell: UICollectionViewCell {
+    let posterImageView = UIImageView()
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        contentView.addSubview(posterImageView)
+        posterImageView.snp.makeConstraints { make in
+            make.edges.equalTo(contentView)
+        }
+        posterImageView.backgroundColor = .systemMint
+        posterImageView.contentMode = .scaleAspectFill // 이미지의 콘텐츠 모드를 설정
+        posterImageView.clipsToBounds = true // 이미지가 프레임을 넘어가지 않도록 설정
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("에러")
+    }
+}
+
+
+
+import UIKit
+
+class SimilarCollectionViewCell: UICollectionViewCell {
+    let posterImageView = UIImageView()
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        contentView.addSubview(posterImageView)
+        posterImageView.snp.makeConstraints { make in
+            make.edges.equalTo(contentView)
+        }
+        posterImageView.backgroundColor = .systemMint
+        posterImageView.contentMode = .scaleAspectFill // 이미지의 콘텐츠 모드를 설정
+        posterImageView.clipsToBounds = true // 이미지가 프레임을 넘어가지 않도록 설정
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("에러")
+    }
+}

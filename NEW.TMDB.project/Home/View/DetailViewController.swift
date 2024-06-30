@@ -5,20 +5,6 @@
 //  Created by 이윤지 on 6/28/24.
 //
 
-struct SimilarMovieResponse: Decodable {
-    let page: Int
-    let results: [PopularMovie]
-    let total_pages: Int
-    
-}
-
-struct RecommendMovieResponse: Decodable {
-    let page: Int
-    let results: [PopularMovie]
-    let total_pages: Int
-    
-}
-
 import UIKit
 import Alamofire
 import Kingfisher
@@ -59,22 +45,22 @@ class DetailViewController: UIViewController {
     
     private func fetchMovieData() {
         guard let movieId = popularMovieModel?.id else { return }
-       
+        
         let group = DispatchGroup()
+        
         group.enter()
-        TMDBAPI.shared.fetchSimilarMovies(api: .simiarMovie(movieId: movieId), indexMovieID: movieId) { movies, error in
+        TMDBAPI.shared.fetchSimilarMovies(api: .simiarMovie(movieId: movieId), indexMovieID: movieId) { (response: SimilarMovieResponse?, error) in
             if let error = error {
                 print("비슷한 영화 가져오기 오류: \(error)")
                 self.failedMovieIds.insert(movieId)
             } else {
-                if let movies = movies {
+                if let movies = response?.results {
                     self.similarMovieModels = movies
                     self.tableView.reloadData()
                 }
             }
             group.leave()
         }
-
         
 
         group.enter()

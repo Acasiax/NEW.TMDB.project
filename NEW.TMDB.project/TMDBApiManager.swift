@@ -8,6 +8,30 @@
 import Foundation
 import Alamofire
 
+enum YunjiError: Int, Error {
+    case invalidURL = 1001
+    case noResponse = 1002
+    case decodingFailed = 1003
+    case networkError = 1004
+    case unknownError = 1005
+
+    var localizedDescription: String {
+        switch self {
+        case .invalidURL:
+            return "유효하지 않은 URL입니다."
+        case .noResponse:
+            return "서버로부터 응답이 없습니다."
+        case .decodingFailed:
+            return "응답을 디코딩하는 데 실패했습니다."
+        case .networkError:
+            return "네트워크 오류가 발생했습니다."
+        case .unknownError:
+            return "알 수 없는 오류가 발생했습니다."
+        }
+    }
+}
+
+
 enum TMDBApiManager {
     
     case popularMovie
@@ -51,3 +75,4 @@ enum TMDBApiManager {
     }
     
 }
+

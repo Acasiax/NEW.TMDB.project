@@ -78,9 +78,10 @@ class DetailViewController: UIViewController {
         
 
         group.enter()
+        
         TMDBAPI.shared.fetchRecommendations(api: .recommendMovie(movieId: movieId), for: movieId) { movie, error in
             if let error = error {
-                print("고객님 이런\(error)")
+                print("추천 영화 가져오기 오류\(error)")
                 self.failedMovieIds.insert(movieId)
             } else {
                 if let movie = movie {
@@ -194,3 +195,4 @@ extension DetailViewController: UICollectionViewDataSource, UICollectionViewDele
         return UICollectionViewCell()
     }
 }
+

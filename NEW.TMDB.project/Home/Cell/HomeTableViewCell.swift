@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-class HomeTableViewCell: UITableViewCell {
+class HomeTableViewCell: BaseTableViewCell {
     var HomeMoviemodels = [PopularMovie]() // 영화 데이터를 저장하는 프로퍼티
     
     let titleLabel: UILabel = {
@@ -42,12 +42,12 @@ class HomeTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configureHierarchy() {
+    override func configureHierarchy() {
         contentView.addSubview(titleLabel)
         contentView.addSubview(collectionView)
     }
     
-    func configureLayout() {
+    override func configureLayout() {
         titleLabel.snp.makeConstraints { make in
             make.top.horizontalEdges.equalTo(contentView).inset(20)
             make.height.equalTo(20)
@@ -59,7 +59,7 @@ class HomeTableViewCell: UITableViewCell {
         }
     }
     //백그라운드
-    func configureView(){
+    override func configureView(){
       //  collectionView.backgroundColor = .blue
         //titleLabel.backgroundColor = .red
     }

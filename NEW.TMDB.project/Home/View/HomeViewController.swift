@@ -11,7 +11,7 @@ import Alamofire
 
 // 1. url  2.query string  3. http헤더 작성하기 4.request 5.response (response string)
 // 
-final class HomeViewController: UIViewController {
+final class HomeViewController: BaseViewcontroller {
     
     private var collectionView: UICollectionView!
     private var popularMoviemodels = [PopularMovie]()

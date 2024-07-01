@@ -9,7 +9,7 @@ import UIKit
 import Alamofire
 import Kingfisher
 
-class DetailViewController: UIViewController {
+class DetailViewController: BaseViewcontroller {
     
     private var popularMovieModel: PopularMovie?  // 선택한 영화 정보를 저장할 프로퍼티
     private var similarMovieModels = [PopularMovie]()
@@ -87,20 +87,20 @@ class DetailViewController: UIViewController {
  
     
     //서브뷰
-    func configureHierarchy() {
+    override func configureHierarchy() {
         view.addSubview(tableView)
         
     }
     
     //스냅킷
-    func configureLayout(){
+    override func configureLayout(){
         tableView.snp.makeConstraints { make in
             make.edges.equalTo(view.safeAreaLayoutGuide)
         }
     }
     
     //백그라운드
-    
+    override     
     func configureView(){
         view.backgroundColor = .gray
     }

@@ -33,6 +33,7 @@ final class NasaViewController: BaseViewcontroller {
     private let nasaImageView = UIImageView()
     private let progressLabel = UILabel()
     private let requestButton = UIButton()
+    private let activityIndicator = UIActivityIndicatorView(style: .large)
     
     private var total: Double = 0 // 이미지의 총 크기
     private var buffer: Data? {
@@ -62,6 +63,8 @@ final class NasaViewController: BaseViewcontroller {
     
     @objc private func requestButtonClicked() {
         buffer = Data()
+        requestButton.isEnabled = false
+        activityIndicator.startAnimating()
         callRequest()
     }
     
@@ -69,6 +72,7 @@ final class NasaViewController: BaseViewcontroller {
         view.addSubview(nasaImageView)
         view.addSubview(progressLabel)
         view.addSubview(requestButton)
+        view.addSubview(activityIndicator)
     }
 
     override func configureLayout() {
@@ -88,13 +92,17 @@ final class NasaViewController: BaseViewcontroller {
             make.leading.trailing.bottom.equalTo(view.safeAreaLayoutGuide).inset(20)
             make.top.equalTo(progressLabel.snp.bottom).offset(20)
         }
+        
+        activityIndicator.snp.makeConstraints { make in
+                make.center.equalTo(view)
+            }
     }
     
     override func configureView() {
         view.backgroundColor = .white
         requestButton.backgroundColor = .blue
         progressLabel.backgroundColor = .lightGray
-        progressLabel.text = "100% 중 35.5% 완료"
+        progressLabel.text = "0% 완료"
         nasaImageView.backgroundColor = .systemBrown
         requestButton.addTarget(self, action: #selector(requestButtonClicked), for: .touchUpInside)
     }
@@ -125,6 +133,8 @@ extension NasaViewController: URLSessionDataDelegate {
     // 3. 응답이 완료가 될 때 호출됨.
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
         print(#function, error)
+        activityIndicator.stopAnimating()
+        requestButton.isEnabled = true
         
         if let error = error {
             progressLabel.text = "문제가 발생했습니다."

@@ -11,7 +11,7 @@ import Alamofire
 
 // 1. url  2.query string  3. http헤더 작성하기 4.request 5.response (response string)
 // 
-class HomeViewController: UIViewController {
+final class HomeViewController: UIViewController {
     
     private var collectionView: UICollectionView!
     private var popularMoviemodels = [PopularMovie]()
@@ -23,7 +23,7 @@ class HomeViewController: UIViewController {
         fetchPopularMovies()
     }
     
-    func setupCollectionView() {
+    private func setupCollectionView() {
             let layout = UICollectionViewFlowLayout()
             layout.itemSize = CGSize(width: view.frame.size.width / 1 - 30, height: view.frame.size.width / 1 )
             layout.minimumInteritemSpacing = 5
@@ -43,7 +43,7 @@ class HomeViewController: UIViewController {
 
     
     
-    func fetchPopularMovies(){
+    private func fetchPopularMovies(){
         let popularMovieurl = APIUrl.popularMovieUrl + "&page=1"
         
         let header: HTTPHeaders = [

@@ -59,18 +59,7 @@ final class HomeViewController: UIViewController {
                 print(error)
             }
         }
-        
-        
-//        AF.request(popularMovieurl, method: .get, headers: header).responseString { response in
-//            switch response.result {
-//            case .success(let value):
-//                print(value)
-//            case .failure(let error):
-//                print(error)
-//            }
-//            print(response)
-//        }
-//        
+
     }
    
 

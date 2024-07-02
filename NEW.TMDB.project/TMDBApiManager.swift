@@ -37,6 +37,7 @@ enum TMDBApiManager {
     case popularMovie
     case simiarMovie(movieId: Int)
     case recommendMovie(movieId: Int)
+    case video(movieId: Int)
     
     var baseURL: String {
         return "https://api.themoviedb.org/3/"
@@ -50,7 +51,11 @@ enum TMDBApiManager {
             return URL(string: baseURL + "movie/\(movieId)/similar?api_key=\(APIKey.TMDBAPIKey)")!
         case .recommendMovie(let movieId):
             return URL(string: baseURL + "movie/\(movieId)/recommendations?api_key=\(APIKey.TMDBAPIKey)")!
+        case .video(let movieId):
+                    return URL(string: baseURL + "movie/\(movieId)/videos?api_key=\(APIKey.TMDBAPIKey)")!  // 비디오 API 엔드포인트
+                
         }
+        
         
     }
     
@@ -70,6 +75,8 @@ enum TMDBApiManager {
         case .simiarMovie(movieId: let movieId):
             return ["language": "ko-KR", "page": "1"]
         case .recommendMovie(movieId: let movieId):
+            return ["language": "ko-KR", "page": "1"]
+        case .video(movieId: let movieId):
             return ["language": "ko-KR", "page": "1"]
         }
     }

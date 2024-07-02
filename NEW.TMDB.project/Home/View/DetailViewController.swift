@@ -180,5 +180,25 @@ extension DetailViewController: UICollectionViewDataSource, UICollectionViewDele
         }
         return UICollectionViewCell()
     }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if collectionView.tag == 0 {
+            let selectedMovie = recommendMoviemodels[indexPath.item]
+            let youtubeVC = YoutubeViewController()
+            youtubeVC.fetchSimilarMovies(api: .video(movieId: selectedMovie.id)) { (response: VideoResponse?, error) in
+                if let error = error {
+                    print("Error fetching video data: \(error)")
+                    return
+                }
+                if let response = response,
+                   let firstVideo = response.results.first {
+                    youtubeVC.videoKey = firstVideo.key
+                    youtubeVC.loadYoutubeVideo()
+                }
+            }
+            navigationController?.pushViewController(youtubeVC, animated: true)
+        }
+    }
+
 }
 
